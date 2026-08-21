@@ -1,0 +1,12 @@
+<%= form_with model: [:settings, api_connection], class: "space-y-6" do |form| %>
+  <% if api_connection.errors.any? %><div role="alert" class="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-300"><p class="font-semibold">Please correct the following:</p><ul class="mt-2 list-disc pl-5"><% api_connection.errors.full_messages.each do |message| %><li><%= message %></li><% end %></ul></div><% end %>
+  <div class="grid gap-5 sm:grid-cols-2">
+    <div><%= form.label :name, class: "mb-1 block text-sm font-medium" %><%= form.text_field :name, required: true, class: "ui-input w-full" %></div>
+    <div><%= form.label :base_url, class: "mb-1 block text-sm font-medium" %><%= form.url_field :base_url, required: true, placeholder: "https://pathology.example.com", class: "ui-input w-full" %></div>
+    <div><%= form.label :authentication_method, class: "mb-1 block text-sm font-medium" %><%= form.select :authentication_method, ApiConnection::AUTHENTICATION_METHODS.map { |method| [method.humanize, method] }, {}, class: "ui-input w-full" %></div>
+    <div><%= form.label :sync_interval, "Sync interval (minutes)", class: "mb-1 block text-sm font-medium" %><%= form.number_field :sync_interval, min: 1, required: true, class: "ui-input w-full" %></div>
+    <div class="sm:col-span-2"><%= form.label :credentials_token, "Credentials / token", class: "mb-1 block text-sm font-medium" %><%= form.password_field :credentials_token, autocomplete: "new-password", placeholder: api_connection.credentials_configured? ? "Leave blank to keep the existing secret" : "Enter secret; it will be encrypted", class: "ui-input w-full" %><p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Secrets are encrypted at rest and never displayed after saving.</p></div>
+    <label class="flex items-center gap-3 text-sm font-medium"><%= form.check_box :enabled, class: "h-4 w-4 rounded border-slate-300 text-indigo-600" %> Enabled</label>
+  </div>
+  <div class="flex gap-3"><%= form.submit api_connection.persisted? ? "Save changes" : "Create connection", class: "ui-btn ui-btn-primary" %><%= link_to "Cancel", settings_api_connections_path, class: "ui-btn ui-btn-secondary" %></div>
+<% end %>

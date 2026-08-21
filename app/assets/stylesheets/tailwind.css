@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  html { font-feature-settings: "cv02", "cv03", "cv04", "cv11"; }
+  body { letter-spacing: -0.01em; }
+  button, a, input, select, textarea { outline-offset: 2px; }
+  :focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }
+}
+
+@layer components {
+  .ui-card { border: 1px solid rgb(226 232 240); border-radius: 0.75rem; background: white; box-shadow: 0 1px 2px rgb(15 23 42 / 0.04); }
+  .ui-card-muted { border: 1px solid rgb(226 232 240); border-radius: 0.75rem; background: rgb(248 250 252); }
+  .ui-btn { display: inline-flex; min-height: 2.5rem; align-items: center; justify-content: center; gap: 0.5rem; border-radius: 0.5rem; padding: 0.625rem 0.875rem; font-size: 0.875rem; font-weight: 600; line-height: 1; transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease; }
+  .ui-btn-primary { background: rgb(79 70 229); color: white; }
+  .ui-btn-primary:hover { background: rgb(67 56 202); }
+  .ui-btn-secondary { border: 1px solid rgb(203 213 225); background: white; color: rgb(51 65 85); }
+  .ui-btn-secondary:hover { background: rgb(248 250 252); }
+  .ui-btn-danger { background: rgb(225 29 72); color: white; }
+  .ui-btn-danger:hover { background: rgb(190 18 60); }
+  .ui-input { min-height: 2.5rem; border: 1px solid rgb(203 213 225); border-radius: 0.5rem; background: white; padding: 0.625rem 0.75rem; font-size: 0.875rem; }
+  .ui-input::placeholder { color: rgb(148 163 184); }
+  .ui-input:focus { border-color: rgb(99 102 241); box-shadow: 0 0 0 3px rgb(99 102 241 / 0.15); outline: none; }
+  .ui-table th { white-space: nowrap; background: rgb(248 250 252); padding: 0.75rem 1rem; font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgb(100 116 139); }
+  .ui-table td { padding: 0.875rem 1rem; vertical-align: middle; }
+  .ui-table tbody tr:hover { background: rgb(248 250 252); }
+  .ui-empty { border: 1px dashed rgb(203 213 225); border-radius: 0.75rem; padding: 3rem 1.5rem; text-align: center; }
+  .ui-kicker { font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgb(79 70 229); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+
+@layer utilities {
+  .dark .ui-card { border-color: rgb(30 41 59); background: rgb(15 23 42); }
+  .dark .ui-card-muted { border-color: rgb(30 41 59); background: rgb(15 23 42 / 0.7); }
+  .dark .ui-btn-secondary { border-color: rgb(51 65 85); background: rgb(15 23 42); color: rgb(226 232 240); }
+  .dark .ui-btn-secondary:hover { background: rgb(30 41 59); }
+  .dark .ui-input { border-color: rgb(51 65 85); background: rgb(2 6 23); color: white; }
+  .dark .ui-table th { background: rgb(2 6 23 / 0.55); color: rgb(148 163 184); }
+  .dark .ui-table tbody tr:hover { background: rgb(2 6 23 / 0.55); }
+  .dark .ui-empty { border-color: rgb(51 65 85); }
+}

@@ -1,0 +1,82 @@
+<% content_for :page_title, "Slides" %>
+<div class="mb-6 flex flex-col justify-between gap-3 lg:flex-row lg:items-end">
+  <div>
+    <p class="text-sm text-slate-600 dark:text-slate-400">Search imported slide metadata, inspect the decision, and follow the archive trail.</p>
+  </div>
+  <div class="text-sm text-slate-500 dark:text-slate-400"><%= number_with_delimiter(@total_count) %> <%= "slide".pluralize(@total_count) %></div>
+</div>
+
+<%= form_with url: slides_path, method: :get, scope: nil, local: true, class: "ui-card mb-6 p-4 sm:p-5" do |form| %>
+  <div class="flex flex-col gap-3 lg:flex-row">
+    <%= form.label :q, "Global search", class: "sr-only" %>
+    <%= form.search_field :q, value: params[:q], placeholder: "Search slide ID, case, patient, barcode, scanner, hospital, tags…", class: "ui-input min-w-0 flex-1" %>
+    <%= form.select :match, options_for_select([["Partial match", "partial"], ["Exact match", "exact"]], params[:match].presence || "partial"), {}, class: "ui-input" %>
+    <%= form.select :status, options_for_select([["All statuses", ""]] + Slide.statuses.keys.map { |s| [human_enum(s), s] }, params[:status]), {}, class: "ui-input" %>
+    <%= form.select :decision, options_for_select([["All decisions", ""]] + Slide.decisions.keys.map { |d| [human_enum(d), d] }, params[:decision]), {}, class: "ui-input" %>
+    <%= form.submit "Search", data: { turbo_submits_with: "Searching…" }, class: "ui-btn ui-btn-primary" %>
+  </div>
+  <details class="mt-4">
+    <summary class="cursor-pointer text-sm font-medium text-slate-600 dark:text-slate-300">More filters</summary>
+    <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <% [["slide_uid", "Slide ID"], ["case_id", "Case ID"], ["patient_id", "Patient ID"], ["barcode", "Barcode"], ["scanner", "Scanner"], ["hospital", "Hospital"], ["department", "Department"], ["slide_type", "Slide type"], ["stain", "Stain"]].each do |field, label| %>
+        <%= form.text_field field, value: params[field], placeholder: label, aria: { label: label }, class: "ui-input w-full" %>
+      <% end %>
+      <%= form.date_field :acquisition_from, value: params[:acquisition_from], aria: { label: "Acquisition date from" }, placeholder: "Acquired from", class: "ui-input w-full" %>
+      <%= form.date_field :acquisition_to, value: params[:acquisition_to], aria: { label: "Acquisition date to" }, placeholder: "Acquired to", class: "ui-input w-full" %>
+      <%= form.date_field :received_from, value: params[:received_from], aria: { label: "Received date from" }, placeholder: "Received from", class: "ui-input w-full" %>
+      <%= form.date_field :received_to, value: params[:received_to], aria: { label: "Received date to" }, placeholder: "Received to", class: "ui-input w-full" %>
+    </div>
+  </details>
+<% end %>
+
+<% if @search_error %>
+  <div role="alert" class="mb-6 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-900 dark:bg-rose-950/40 dark:text-rose-300"><%= @search_error %></div>
+<% end %>
+
+<div class="ui-card overflow-hidden" aria-busy="false">
+  <% if @slides.any? %>
+    <div class="overflow-x-auto">
+      <table class="ui-table min-w-full text-left text-sm">
+        <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-950/50 dark:text-slate-400">
+          <tr>
+            <% [["slide_uid", "Slide ID"], ["case_id", "Case ID"], ["slide_type", "Slide type"], ["stain", "Stain"], ["scanner", "Scanner"], ["status", "Status"], ["decision", "Decision"], ["received_at", "Received"], ["retention_expires_at", "Retention"]].each do |column, label| %>
+            <th><%= link_to label, slides_path(slides_query_params(sort: column, direction: params[:direction] == "asc" ? "desc" : "asc")), class: "hover:text-indigo-600" %></th>
+            <% end %>
+            <th class="px-4 py-3 font-semibold">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+          <% @slides.each do |slide| %>
+            <tr class="hover:bg-slate-50 dark:hover:bg-slate-950/50">
+              <td class="whitespace-nowrap px-4 py-4 font-medium"><%= link_to slide.slide_uid, slide_path(slide), class: "text-indigo-600 hover:underline dark:text-indigo-400" %></td>
+              <td class="whitespace-nowrap px-4 py-4"><%= slide.case_id %></td>
+              <td class="whitespace-nowrap px-4 py-4"><%= slide.slide_type.presence || "—" %></td>
+              <td class="whitespace-nowrap px-4 py-4"><%= slide.stain.presence || "—" %></td>
+              <td class="whitespace-nowrap px-4 py-4"><%= slide.scanner.presence || "—" %></td>
+              <td class="whitespace-nowrap px-4 py-4"><span class="<%= badge_classes(:status, slide.status) %>"><%= human_enum(slide.status) %></span></td>
+              <td class="whitespace-nowrap px-4 py-4"><span class="<%= badge_classes(:decision, slide.decision) %>"><%= human_enum(slide.decision) %></span></td>
+              <td class="whitespace-nowrap px-4 py-4 text-slate-600 dark:text-slate-400"><%= slide.received_at.to_fs(:short) %></td>
+              <td class="whitespace-nowrap px-4 py-4 text-slate-600 dark:text-slate-400"><%= retention_label(slide) %></td>
+              <td class="whitespace-nowrap px-4 py-4"><%= link_to "View", slide_path(slide), class: "font-medium text-indigo-600 hover:underline dark:text-indigo-400" %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="ui-empty m-4">
+      <h2 class="font-semibold">No slides found</h2>
+      <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Try adjusting your search or filters. Imported slides will appear here.</p>
+    </div>
+  <% end %>
+</div>
+
+<% if @total_pages > 1 %>
+  <nav class="mt-6 flex items-center justify-between text-sm" aria-label="Slides pagination">
+    <span class="text-slate-500 dark:text-slate-400">Page <%= @page %> of <%= @total_pages %></span>
+    <div class="flex gap-2">
+      <%= link_to "Previous", slides_path(slides_query_params(page: @page - 1)), class: "ui-btn ui-btn-secondary #{'pointer-events-none opacity-40' if @page <= 1}" %>
+      <%= link_to "Next", slides_path(slides_query_params(page: @page + 1)), class: "ui-btn ui-btn-secondary #{'pointer-events-none opacity-40' if @page >= @total_pages}" %>
+    </div>
+  </nav>
+<% end %>

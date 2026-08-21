@@ -1,0 +1,20 @@
+<aside class="hidden w-64 shrink-0 border-r border-slate-200 bg-white p-4 md:block dark:border-slate-800 dark:bg-slate-900">
+  <div class="mb-8 flex items-center gap-3 px-2">
+    <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">PA</div>
+    <div><p class="font-semibold tracking-tight">Pathology Archive</p><p class="text-xs text-slate-500 dark:text-slate-400">Operations console</p></div>
+  </div>
+  <nav aria-label="Main navigation" class="space-y-6">
+    <div><p class="mb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Workspace</p><div class="space-y-1">
+      <%= link_to "Dashboard", dashboard_path, class: "block rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" %>
+      <%= link_to "Slides", slides_path, class: "block rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" %>
+      <%= link_to "Reviews", reviews_path, class: "block rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" %>
+      <%= link_to "Retention queue", retention_queue_path, class: "block rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" %>
+    </div></div>
+    <% if current_user.system_administrator? || current_user.archive_administrator? %><div><p class="mb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Administration</p><div class="space-y-1">
+      <%= link_to "API connections", settings_api_connections_path, class: "block rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" %>
+      <%= link_to "Archive rules", settings_archive_rules_path, class: "block rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" %>
+      <%= link_to "Storage", settings_storage_path, class: "block rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" %>
+      <%= link_to "Audit logs", audit_logs_path, class: "block rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800" %>
+    </div></div><% end %>
+  </nav>
+</aside>

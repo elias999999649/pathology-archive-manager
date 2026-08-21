@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+require "foreman"
+
+Foreman.start(ENV.fetch("FORMANFILE", "Procfile.dev"))

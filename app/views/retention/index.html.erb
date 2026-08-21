@@ -1,0 +1,5 @@
+<% content_for :page_title, "Retention" %>
+<div class="mb-6"><p class="text-sm text-slate-600 dark:text-slate-400">Monitor upcoming expirations and review slides eligible for deletion. No slide is deleted by this workflow.</p></div>
+<div class="mb-6 grid gap-4 sm:grid-cols-2"><div class="ui-card p-5"><p class="text-sm text-slate-500 dark:text-slate-400">Expiring in the next <%= @days_ahead %> days</p><p class="mt-2 text-2xl font-bold"><%= number_with_delimiter(@expiring_slides.size) %></p></div><div class="ui-card border-amber-200 bg-amber-50 p-5 dark:border-amber-900 dark:bg-amber-950/30"><p class="text-sm text-amber-700 dark:text-amber-300">Eligible for deletion</p><p class="mt-2 text-2xl font-bold text-amber-900 dark:text-amber-100"><%= number_with_delimiter(@eligible_slides.size) %></p></div></div>
+<%= render "table", title: "Expiring soon", slides: @expiring_slides, empty_message: "No slides are expiring soon." %>
+<div class="mt-8"><%= render "table", title: "Deletion queue", slides: @eligible_slides, empty_message: "The deletion queue is empty." %></div>

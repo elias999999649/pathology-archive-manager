@@ -1,0 +1,54 @@
+<% content_for :page_title, "Dashboard" %>
+<% slides = @dashboard[:slides] %>
+<% storage = @dashboard[:storage] %>
+<% api = @dashboard[:api] %>
+<% rules = @dashboard[:rules] %>
+<% retention = @dashboard[:retention] %>
+<% decision_total = rules[:distribution].values.sum %>
+
+<div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+  <p class="text-sm text-slate-600 dark:text-slate-400">A fast operational overview of your archive workspace.</p>
+  <%= link_to "View all slides", slides_path, class: "text-sm font-semibold text-indigo-600 hover:underline dark:text-indigo-400" %>
+</div>
+
+<section aria-labelledby="slides-summary-heading">
+  <h2 id="slides-summary-heading" class="mb-3 text-lg font-semibold">Slides</h2>
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
+    <% [["Total", slides[:total], slides_path], ["Added today", slides[:added_today], slides_path], ["Added this week", slides[:added_this_week], slides_path], ["Pending review", slides[:pending_review], reviews_path], ["Kept", slides[:kept], slides_path], ["Delete scheduled", slides[:delete_scheduled], retention_queue_path], ["Deleted", slides[:deleted], slides_path]].each do |label, value, path| %>
+      <%= link_to path, class: "rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-indigo-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-indigo-700" do %>
+        <p class="text-xs font-medium text-slate-500 dark:text-slate-400"><%= label %></p><p class="mt-2 text-2xl font-bold tracking-tight"><%= number_with_delimiter(value) %></p>
+      <% end %>
+    <% end %>
+  </div>
+</section>
+
+<div class="mt-8 grid gap-6 xl:grid-cols-2">
+  <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900" aria-labelledby="storage-heading">
+    <div class="flex items-start justify-between gap-4"><div><h2 id="storage-heading" class="font-semibold">Storage</h2><p class="mt-1 text-sm text-slate-500 dark:text-slate-400"><%= storage[:provider] || "Not configured" %></p></div><%= link_to "Manage", settings_storage_path, class: "text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400" %></div>
+    <% if storage.present? %>
+      <div class="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4"><% [["Total", storage[:total_bytes]], ["Used", storage[:used_bytes]], ["Free", storage[:free_bytes]]].each do |label, value| %><div><p class="text-xs text-slate-500 dark:text-slate-400"><%= label %></p><p class="mt-1 font-semibold"><%= storage_value(value) %></p></div><% end %><div><p class="text-xs text-slate-500 dark:text-slate-400">Usage</p><p class="mt-1 font-semibold"><%= storage[:usage_percentage] ? "#{storage[:usage_percentage]}%" : "—" %></p></div></div>
+      <div class="mt-5 h-3 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"><div class="h-full rounded-full <%= storage[:status] == "critical_95" ? "bg-rose-500" : storage[:status] == "warning_90" ? "bg-orange-500" : storage[:status] == "warning_80" ? "bg-amber-500" : "bg-emerald-500" %>" style="width: <%= storage[:usage_percentage] || 0 %>%"></div></div>
+      <p class="mt-2 text-xs text-slate-500 dark:text-slate-400"><%= storage[:checked_at] ? "Checked #{time_ago_in_words(storage[:checked_at])} ago" : "Usage unavailable" %></p>
+    <% else %><div class="mt-5 rounded-lg border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">No storage snapshot is available yet.</div><% end %>
+  </section>
+  <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900" aria-labelledby="api-heading">
+    <div class="flex items-start justify-between gap-4"><div><h2 id="api-heading" class="font-semibold">API connections</h2><p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Integration health at a glance</p></div><%= link_to "Manage", settings_api_connections_path, class: "text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400" %></div>
+    <div class="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3"><div><p class="text-xs text-slate-500 dark:text-slate-400">Connected</p><p class="mt-1 text-2xl font-bold text-emerald-600"><%= api[:connected] %></p></div><div><p class="text-xs text-slate-500 dark:text-slate-400">Offline</p><p class="mt-1 text-2xl font-bold text-rose-600"><%= api[:offline] %></p></div><div><p class="text-xs text-slate-500 dark:text-slate-400">Last synchronization</p><p class="mt-1 font-semibold"><%= api[:last_synchronization] ? time_ago_in_words(api[:last_synchronization]) + " ago" : "Never" %></p></div></div>
+  </section>
+</div>
+
+<div class="mt-6 grid gap-6 xl:grid-cols-2">
+  <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900" aria-labelledby="rules-heading">
+    <div class="flex items-start justify-between gap-4"><div><h2 id="rules-heading" class="font-semibold">Rules</h2><p class="mt-1 text-sm text-slate-500 dark:text-slate-400"><%= rules[:active] %> active rules</p></div><%= link_to "Manage", settings_archive_rules_path, class: "text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400" %></div>
+    <% if decision_total.zero? %><p class="mt-6 text-sm text-slate-500 dark:text-slate-400">No rule decisions recorded yet.</p><% else %><div class="mt-5 space-y-3"><% rules[:distribution].sort_by { |_name, count| -count }.each do |decision, count| %><div><div class="mb-1 flex justify-between text-xs"><span><%= decision.to_s.humanize %></span><span class="text-slate-500"><%= count %></span></div><div class="h-2 rounded-full bg-slate-100 dark:bg-slate-800"><div class="h-2 rounded-full bg-indigo-500" style="width: <%= (count.to_f / decision_total * 100).round(1) %>%"></div></div></div><% end %></div><div class="mt-6 overflow-x-auto"><table class="min-w-full text-left text-sm"><thead class="text-xs uppercase text-slate-500"><tr><th class="pb-2 pr-4">Slide</th><th class="pb-2 pr-4">Decision</th><th class="pb-2">Rule</th></tr></thead><tbody class="divide-y divide-slate-100 dark:divide-slate-800"><% rules[:recent_decisions].each do |decision| %><tr><td class="py-2 pr-4 font-medium"><%= decision[:slide_uid] %></td><td class="py-2 pr-4"><%= decision[:decision].to_s.humanize %></td><td class="py-2"><%= decision[:rule_name] %></td></tr><% end %></tbody></table></div><% end %>
+  </section>
+  <section class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900" aria-labelledby="retention-heading">
+    <div class="flex items-start justify-between gap-4"><div><h2 id="retention-heading" class="font-semibold">Retention</h2><p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Upcoming lifecycle work</p></div><%= link_to "Open queue", retention_queue_path, class: "text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400" %></div>
+    <div class="mt-5 grid grid-cols-2 gap-4"><div class="rounded-lg bg-amber-50 p-4 dark:bg-amber-950/30"><p class="text-xs text-amber-700 dark:text-amber-300">Expiring soon</p><p class="mt-2 text-2xl font-bold"><%= retention[:expiring_soon] %></p></div><div class="rounded-lg bg-rose-50 p-4 dark:bg-rose-950/30"><p class="text-xs text-rose-700 dark:text-rose-300">Eligible for deletion</p><p class="mt-2 text-2xl font-bold"><%= retention[:eligible_for_deletion] %></p></div></div>
+  </section>
+</div>
+
+<section class="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900" aria-labelledby="activity-heading">
+  <h2 id="activity-heading" class="font-semibold">Recent activity</h2><p class="mt-1 text-sm text-slate-500 dark:text-slate-400">The latest audit events</p>
+  <% if @dashboard[:activity].empty? %><p class="mt-6 text-sm text-slate-500 dark:text-slate-400">No activity recorded yet.</p><% else %><div class="mt-4 overflow-x-auto"><table class="min-w-full text-left text-sm"><thead class="text-xs uppercase text-slate-500"><tr><th class="pb-2 pr-4">Event</th><th class="pb-2 pr-4">Actor</th><th class="pb-2">When</th></tr></thead><tbody class="divide-y divide-slate-100 dark:divide-slate-800"><% @dashboard[:activity].each do |event| %><tr><td class="py-3 pr-4 font-medium"><%= event[:event_type].to_s.humanize %></td><td class="py-3 pr-4"><%= event[:actor] %></td><td class="py-3 text-slate-500"><%= time_ago_in_words(event[:created_at]) %> ago</td></tr><% end %></tbody></table></div><% end %>
+</section>
