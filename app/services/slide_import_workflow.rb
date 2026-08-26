@@ -23,7 +23,7 @@ class SlideImportWorkflow
       evaluation = ArchiveRuleEvaluationService.call(slide, actor: actor)
       apply_decision!(slide, evaluation)
       AuditLogger.record!(event_type: "slide.automatic_decision", auditable: slide, actor: actor, metadata: { final_decision: slide.decision, decision_reason: slide.decision_reason, winning_rule_id: evaluation.winning_rule_id, matched_rule_ids: evaluation.matched_rule_ids, deletion_status: slide.deletion_status })
-      decision_event = slide.delete? || slide.delete_after_retention? ? "slide.automatic_delete" : (slide.keep? || slide.keep_forever? ? "slide.automatic_keep" : nil)
+      decision_event = slide.decision_delete? || slide.decision_delete_after_retention? ? "slide.automatic_delete" : (slide.decision_keep? || slide.decision_keep_forever? ? "slide.automatic_keep" : nil)
       AuditLogger.record!(event_type: decision_event, auditable: slide, actor: actor, reason: slide.decision_reason, metadata: { final_decision: slide.decision }) if decision_event
       AuditLogger.record!(event_type: "slide.imported", auditable: slide, actor: actor, metadata: { received_at: slide.received_at.iso8601 })
     end

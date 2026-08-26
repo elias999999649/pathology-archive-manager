@@ -8,5 +8,4 @@ Rails.application.configure do
   config.active_storage.service = :local
   config.action_mailer.raise_delivery_errors = false
   config.active_support.deprecation = :log
-  config.assets.quiet = true
 end

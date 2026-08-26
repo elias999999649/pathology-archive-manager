@@ -22,7 +22,7 @@ class Slide < ApplicationRecord
     manual_review: "manual_review",
     keep_forever: "keep_forever",
     delete_after_retention: "delete_after_retention"
-  }, validate: true
+  }, prefix: true, validate: true
 
   enum :retention_status, {
     not_scheduled: "not_scheduled",
@@ -78,33 +78,33 @@ class Slide < ApplicationRecord
   end
 
   def status_and_decision_are_consistent
-    if deleted? && !delete?
+    if deleted? && !decision_delete?
       errors.add(:decision, "must be delete when the slide is deleted")
     end
 
-    if delete? && !received? && !available? && !deleted?
+    if decision_delete? && !received? && !available? && !deleted?
       errors.add(:status, "must be received, available, or deleted for a delete decision")
     end
 
-    if under_review? && !undecided? && !manual_review?
+    if under_review? && !decision_undecided? && !decision_manual_review?
       errors.add(:decision, "must be undecided or manual review while under review")
     end
 
-    if archived? && !keep? && !keep_forever? && !delete_after_retention?
+    if archived? && !decision_keep? && !decision_keep_forever? && !decision_delete_after_retention?
       errors.add(:decision, "must be a keep decision when archived")
     end
 
-    if manual_review? && !received? && !available? && !under_review?
+    if decision_manual_review? && !received? && !available? && !under_review?
       errors.add(:status, "must be received, available, or under review for manual review")
     end
   end
 
   def retention_requirements
-    if delete_after_retention? && retention_period.blank? && retention_duration.blank?
+    if decision_delete_after_retention? && retention_period.blank? && retention_duration.blank?
       errors.add(:retention_period, "or a retention duration is required for delete after retention")
     end
 
-    if keep_forever? && retention_expires_at.present?
+    if decision_keep_forever? && retention_expires_at.present?
       errors.add(:retention_expires_at, "must be blank for keep forever")
     end
   end

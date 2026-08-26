@@ -3,7 +3,10 @@ source "https://rubygems.org"
 git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 gem "rails", "~> 8.0"
+gem "propshaft"
+gem "tzinfo-data", platforms: :windows
 gem "bootsnap", require: false
+gem "fiddle"
 gem "pg", "~> 1.5"
 gem "puma", ">= 6.0"
 gem "bcrypt", "~> 3.1"

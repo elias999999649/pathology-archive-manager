@@ -2,7 +2,7 @@ class Review < ApplicationRecord
   belongs_to :slide
   belongs_to :reviewer, class_name: "User"
 
-  enum :decision, { keep: "keep", delete: "delete" }, validate: true
+  enum :decision, { keep: "keep", delete: "delete" }, prefix: true, validate: true
 
   validates :decision, :decided_at, presence: true
   validate :previous_state_is_an_object

@@ -1,3 +1,5 @@
+require "devise/orm/active_record"
+
 Devise.setup do |config|
   config.mailer_sender = "no-reply@pathology-archive.local"
   config.parent_mailer = "ActionMailer::Base"

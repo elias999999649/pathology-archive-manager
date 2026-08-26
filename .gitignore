@@ -11,5 +11,7 @@
 /node_modules/
 /.rspec_status
 /coverage/
+/vendor/bundle/
+/.bundle-home/
 .DS_Store
 *.swp
